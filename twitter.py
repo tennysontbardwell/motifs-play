@@ -12,7 +12,11 @@ def twitter_tweet_iter(one_month=False):
             fp.readline()
             try:
                 while True:
-                    time = re.match(r'T\t(.*)$', fp.readline())[1]
+                    line = fp.readline()
+                    if len(line) < 3:
+                        # for EOF testing
+                        break
+                    time = re.match(r'T\t(.*)$', line)[1]
                     time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
                     user = re.match(r'U\t(.*)$', fp.readline())[1]
                     content = re.match(r'W\t(.*)$', fp.readline())[1]
@@ -23,7 +27,7 @@ def twitter_tweet_iter(one_month=False):
 
                     yield {
                         'time': time,
-                        'timestamp': time.timestamp(),
+                        'timestamp': int(time.timestamp()),
                         'user': user,
                         'content': content,
                         'at': at,
@@ -41,4 +45,15 @@ def twitter_at(one_month=False):
     for tweet in twitter_tweet_iter(one_month=one_month):
         for at in tweet['at']:
             yield tweet['user'], at, tweet['timestamp']
+
+
+def twitter_at_by_hashtag(one_month=False):
+    '''Same as twitter_at, but adds one more element to the head of the tuple:
+    the hashtag that the tweet belonged to. Only returns edges that belong to
+    a hashtag, and will return edges multiple times if the same hashtag is used
+    multiple times'''
+    for tweet in twitter_tweet_iter(one_month=one_month):
+        for at in tweet['at']:
+            for hashtag in tweet['hashtags']
+                yield hashtag, tweet['user'], at, tweet['timestamp']
 

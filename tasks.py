@@ -1,10 +1,24 @@
+from data_set import TxtWriter
+from commons import settings
 from os import path
+import twitter
 
 
-def file_cached(function):
-    def wrapper(path, *args, **kwargs):
-        if not path.exists(path):
-            function(path, *args, **kwargs)
+def main():
+    path_ = path.join(settings['build_dir'],
+                      'twitter/one_month/twitter_at/at_graph.txt')
+    TxtWriter.edges_to_txt(path_, twitter.twitter_at(one_month=True))
 
-    return wrapper
+    path_ = path.join(settings['build_dir'],
+                      'twitter/all/twitter_at/at_graph.txt')
+    TxtWriter.edges_to_txt(path_, twitter.twitter_at())
 
+    path_ = path.join(settings['build_dir'],
+                      'twitter/all/twitter_at/hashtags/')
+    TxtWriter
+    
+    
+
+
+if __name__ == '__main__':
+    main()
