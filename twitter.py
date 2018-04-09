@@ -2,11 +2,17 @@ import glob
 import re
 from datetime import datetime
 import commons
+import collections
+import itertools
+
+
+LOG = commons.make_log(__name__)
 
 
 def twitter_tweet_iter(one_month=False):
     dir_ = commons.settings['data']['twitter']
     files = sorted(glob.glob(dir_ + '/tweets*.txt'))
+    count = itertools.count()
     for file_ in files:
         with open(file_) as fp:
             fp.readline()
@@ -33,6 +39,9 @@ def twitter_tweet_iter(one_month=False):
                         'at': at,
                         'hashtags': hashtags
                     }
+                    i = count.__next__()
+                    if i % 10**6 == 0:
+                        LOG.info('{:,} tweets read'.format(i))
                     
             except EOFError:
                 pass
@@ -41,19 +50,28 @@ def twitter_tweet_iter(one_month=False):
             break
 
 
-def twitter_at(one_month=False):
-    for tweet in twitter_tweet_iter(one_month=one_month):
-        for at in tweet['at']:
-            yield tweet['user'], at, tweet['timestamp']
+class TwitterInterface:
+    def __init__(self):
+        self.one_month=False
 
+    def twitter_at(self):
+        for tweet in twitter_tweet_iter(one_month=self.one_month):
+            for at in tweet['at']:
+                yield tweet['user'], at, tweet['timestamp']
 
-def twitter_at_by_hashtag(one_month=False):
-    '''Same as twitter_at, but adds one more element to the head of the tuple:
-    the hashtag that the tweet belonged to. Only returns edges that belong to
-    a hashtag, and will return edges multiple times if the same hashtag is used
-    multiple times'''
-    for tweet in twitter_tweet_iter(one_month=one_month):
-        for at in tweet['at']:
-            for hashtag in tweet['hashtags']
-                yield hashtag, tweet['user'], at, tweet['timestamp']
+    def twitter_at_by_hashtag(self):
+        '''Same as twitter_at, but in the format (hashtag,
+        (source,target,time)). Only returns edges that belong to a hashtag, and
+        will return edges multiple times if the same hashtag is used multiple
+        times'''
+        for tweet in twitter_tweet_iter(one_month=self.one_month):
+            for at in tweet['at']:
+                for hashtag in tweet['hashtags']:
+                    yield hashtag, (tweet['user'], at, tweet['timestamp'])
+
+    def twitter_hashtag_segregate(self):
+        hashtag_lists = collections.defaultdict(list)
+        for hashtag, edge in self.twitter_at_by_hashtag():
+            hashtag_lists[hashtag].append(edge)
+        return hashtag_lists.items()
 
