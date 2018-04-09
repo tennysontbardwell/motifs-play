@@ -2,7 +2,10 @@ from data_set import TxtWriter
 from commons import settings
 import commons
 import os
+import pickle
+
 import twitter
+import citations
 
 
 @commons.file_cached
@@ -37,10 +40,20 @@ def twitter_task():
                       'twitter/all/twitter_at/hashtags')
     twitter_hashtags(path, False)
 
-    
+
+@commons.file_cached
+def citation_graph(path):
+    cit = citations.CitationInterface()
+    G = cit.colored_graph()
+    with open(path, 'wb') as fp:
+        pickle.dump(G, fp)
+
     
 def main():
-    twitter_task()
+    # twitter_task()
+    path = os.path.join(settings['build_dir'],
+                      'citations/colored_graph.pickle')
+    citation_graph(path)
 
 
 if __name__ == '__main__':
