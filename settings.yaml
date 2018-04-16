@@ -1,4 +1,6 @@
 data:
   twitter: data/twitter_2009
   semanticscholar: /unencrypted/data_store/motifs/data/semanticscholar
-build_dir: build
+build_dir: /unencrypted/data_store/motifs/build
+external_libs:
+  snap: ./snap

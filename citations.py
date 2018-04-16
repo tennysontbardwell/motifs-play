@@ -27,7 +27,7 @@ class CitationInterface:
                     LOG.info('limit of {} reached'.format(self.limit))
                     break
 
-    def colored_graph(self):
+    def colored_graph(self, color_edges=False):
         '''Iterator for the list of edges'''
         def get_authors(paper):
             authors = []
@@ -38,7 +38,6 @@ class CitationInterface:
                 authors.append(author['ids'][0])
             return authors
 
-        G = nx.Graph()
         bad = 0  # number of papers discarded or some reason
         for paper in self.paper_iter():
             id = paper['id']
@@ -50,15 +49,16 @@ class CitationInterface:
                 bad += 1
                 continue
 
-            G.add_node(id, type='paper')
             for author in authors:
-                G.add_node(author, type='author')
-                G.add_edge(author, id)
+                if color_edges:
+                    yield (author, id, 1)
+                else:
+                    yield (author, id)
             for citation in in_citations:
-                G.add_node(citation, type='paper')
-                G.add_edge(id, citation)
+                if color_edges:
+                    yield (id, citation, 2)
+                else:
+                    yield (id, citation)
 
         LOG.info('Discarded {:,} papers'.format(bad))
-
-        return G
 

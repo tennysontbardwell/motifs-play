@@ -42,18 +42,29 @@ def twitter_task():
 
 
 @commons.file_cached
-def citation_graph(path):
+def citation_graph(path, color_edges=False):
     cit = citations.CitationInterface()
-    G = cit.colored_graph()
-    with open(path, 'wb') as fp:
-        pickle.dump(G, fp)
+    with open(path, 'w') as fp:
+        first = True
+        for edge in cit.colored_graph(color_edges=color_edges):
+            if not first:
+                fp.write('\n')
+            else:
+                first = False
+            if color_edges:
+                fp.write('{} {} {}'.format(*edge))
+            else:
+                fp.write('{} {}'.format(*edge))
 
     
 def main():
     # twitter_task()
     path = os.path.join(settings['build_dir'],
-                      'citations/colored_graph.pickle')
+                      'citations/colored_graph.csv')
     citation_graph(path)
+    path = os.path.join(settings['build_dir'],
+                      'citations/colored_graph_signed.csv')
+    citation_graph(path, color_edges=True)
 
 
 if __name__ == '__main__':
