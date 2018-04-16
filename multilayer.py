@@ -142,7 +142,18 @@ class MutlilayerManager:
         return colors
 
 
-    def color j
+    def count_motifs(self):
+        m = Multilayer(self.path)
+        by_color = {}
+
+        by_color['all'] = m.count_motifs()
+
+        for color in self.colors:
+            m = Multilayer(self.path, colors=[color])
+            by_color[color] = m.count_motifs()
+
+        return by_color
+
 
 def augment_graph_weights(path, motifs, weights=None):
     '''constructs a weighted graph based on num of motifs edges particate in
